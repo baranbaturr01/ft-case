@@ -5,6 +5,7 @@ import com.baranbatur.ftTechnology.repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -13,11 +14,11 @@ public class ProductService {
     @Autowired
     ProductRepository productRepository;
 
-    public List<Product> findByExpiredDate(String nowDate) {
+    public List<Product> findByExpiredDate(Date nowDate) {
         return productRepository.findByExpiredDate(nowDate);
     }
 
-    public List<Product> findByNotExpireDate(String nowDate) {
+    public List<Product> findByNotExpireDate(Date nowDate) {
         return productRepository.findByNotExpireDate(nowDate);
     }
 

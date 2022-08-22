@@ -15,7 +15,9 @@ public class ProductCommentService {
     ProductCommentRepository productCommentRepository;
 
     public List<ProductComment> findByProductId(Long productId) {
-        return productCommentRepository.findByProductId(productId);
+
+        List<ProductComment> productComments = productCommentRepository.findByProductId(productId);
+        return productComments;
     }
 
     public List<ProductComment> findByProductIdAndCommentDateBetween(Long productId, Date startDate, Date endDate) {

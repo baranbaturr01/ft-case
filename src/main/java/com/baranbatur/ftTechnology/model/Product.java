@@ -1,6 +1,9 @@
 package com.baranbatur.ftTechnology.model;
 
+import org.springframework.format.annotation.DateTimeFormat;
+
 import javax.persistence.*;
+import java.util.Date;
 
 @Entity
 @Table(name = "products")
@@ -17,12 +20,14 @@ public class Product {
 
     //expiration date
     @Column(name = "expiration_date", nullable = true, length = 50)
-    private String expirationDate;
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
+    private Date expirationDate;
 
     public Product() {
     }
 
-    public Product(Long id, String name, String price, String expirationDate) {
+
+    public Product(Long id, String name, String price, Date expirationDate) {
         this.id = id;
         this.name = name;
         this.price = price;
@@ -53,11 +58,11 @@ public class Product {
         this.price = price;
     }
 
-    public String getExpirationDate() {
+    public Date getExpirationDate() {
         return expirationDate;
     }
 
-    public void setExpirationDate(String expirationDate) {
+    public void setExpirationDate(Date expirationDate) {
         this.expirationDate = expirationDate;
     }
 }

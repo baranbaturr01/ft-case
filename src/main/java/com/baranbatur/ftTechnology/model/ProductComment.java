@@ -1,5 +1,7 @@
 package com.baranbatur.ftTechnology.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.persistence.*;
@@ -7,6 +9,7 @@ import java.util.Date;
 
 @Entity
 @Table(name = "product_comments")
+@JsonIgnoreProperties({"hibernateLazyInitializer"})
 public class ProductComment {
 
     @Id
@@ -18,13 +21,14 @@ public class ProductComment {
 
     //comment date
     @Column(name = "comment_date", nullable = false, length = 50)
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
     private Date commentDate;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id")
     private Product product;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
 
@@ -78,4 +82,5 @@ public class ProductComment {
     public void setUser(User user) {
         this.user = user;
     }
+
 }

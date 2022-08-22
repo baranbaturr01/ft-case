@@ -1,17 +1,18 @@
 package com.baranbatur.ftTechnology.controller;
 
+import com.baranbatur.ftTechnology.model.Product;
 import com.baranbatur.ftTechnology.model.ProductComment;
+import com.baranbatur.ftTechnology.model.User;
 import com.baranbatur.ftTechnology.service.ProductCommentService;
-import org.hibernate.dialect.SybaseAnywhereDialect;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.data.repository.init.ResourceReader;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 @RestController
 @RequestMapping("/product-comment")
@@ -20,35 +21,95 @@ public class ProductCommentController {
     @Autowired
     ProductCommentService productCommentService;
 
-    @PostMapping(value = "/save", produces = {"application/json"})
-    public boolean saveProductComment(@RequestBody ProductComment productComment) throws Exception {
+    @PostMapping(value = "/save/{productId}/{userId}", produces = {"application/json"})
+    public boolean saveProductComment(@PathVariable(value = "productId") Long productId, @PathVariable(value = "userId") Long userId, @RequestBody ProductComment productComment) throws Exception {
 
-//set comment date to current date
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         String currentDate = sdf.format(new Date());
         productComment.setCommentDate(sdf.parse(currentDate));
+
+        Product product = new Product();
+        product.setId(productId);
+        productComment.setProduct(product);
+        User user = new User();
+        user.setId(userId);
+        productComment.setUser(user);
+
         productCommentService.saveProductComment(productComment);
         return true;
     }
 
-    @PostMapping("/findByProductId")
-    public List<ProductComment> findByProductId(@RequestBody Long product_id) {
-        return productCommentService.findByProductId(product_id);
+    @GetMapping(value = "/findByProductId/{productId}", produces = {"application/json"})
+    public List<Object> findByProductId(@PathVariable(value = "productId") Long productId) {
+
+        List<ProductComment> productComments = productCommentService.findByProductId(productId);
+        List<Object> productCommentsObject = new ArrayList<>();
+        for (ProductComment productComment : productComments) {
+            Map<String, Object> productCommentObject = new HashMap<>();
+            productCommentObject.put("id", productComment.getId());
+            productCommentObject.put("comment", productComment.getComment());
+            productCommentObject.put("commentDate", productComment.getCommentDate());
+            productCommentObject.put("product", productComment.getProduct().getName());
+            productCommentObject.put("user", productComment.getUser().getName());
+            productCommentsObject.add(productCommentObject);
+        }
+
+        return ResponseEntity.ok().body(productCommentsObject).getBody();
     }
 
-    @PostMapping("/findByProductIdAndCommentDateBetween")
-    public List<ProductComment> findByProductIdAndCommentDateBetween(@RequestBody Long product_id, @RequestBody Date start_date, @RequestBody Date end_date) {
-        return productCommentService.findByProductIdAndCommentDateBetween(product_id, start_date, end_date);
+    @GetMapping(value = "/findByProductIdAndCommentDateBetween/{productId}/{startDate}/{endDate}", produces = {"application/json"})
+    public List<Object> findByProductIdAndCommentDateBetween(@PathVariable(value = "productId") Long productId, @PathVariable(value = "startDate") String startDate, @PathVariable(value = "endDate") String endDate) throws ParseException {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        Date startDateDate = sdf.parse(startDate);
+        Date endDateDate = sdf.parse(endDate);
+        List<ProductComment> productComments = productCommentService.findByProductIdAndCommentDateBetween(productId, startDateDate, endDateDate);
+        List<Object> productCommentsObject = new ArrayList<>();
+        for (ProductComment productComment : productComments) {
+            Map<String, Object> productCommentObject = new HashMap<>();
+            productCommentObject.put("id", productComment.getId());
+            productCommentObject.put("comment", productComment.getComment());
+            productCommentObject.put("commentDate", productComment.getCommentDate());
+            productCommentObject.put("product", productComment.getProduct().getName());
+            productCommentObject.put("user", productComment.getUser().getName());
+            productCommentsObject.add(productCommentObject);
+        }
+
+        return ResponseEntity.ok().body(productCommentsObject).getBody();
     }
 
-    @PostMapping("/findByUserId")
-    public List<ProductComment> findByUserId(@RequestBody Long user_id) {
-        return productCommentService.findByUserId(user_id);
+    @GetMapping("/findCommentsByUserId/{userId}")
+    public List<Object> findByUserId(@PathVariable Long userId) {
+        List<ProductComment> productComments = productCommentService.findByUserId(userId);
+        List<Object> productCommentsObject = new ArrayList<>();
+        for (ProductComment productComment : productComments) {
+            Map<String, Object> productCommentObject = new HashMap<>();
+            productCommentObject.put("product_id", productComment.getProduct().getId());
+            productCommentObject.put("comment", productComment.getComment());
+            productCommentObject.put("commentDate", productComment.getCommentDate());
+            productCommentObject.put("product", productComment.getProduct().getName());
+            productCommentsObject.add(productCommentObject);
+        }
+
+        return ResponseEntity.ok().body(productCommentsObject).getBody();
     }
 
-    @PostMapping("/findByUserIdAndCommentDateBetween")
-    public List<ProductComment> findByUserIdAndCommentDateBetween(@RequestBody Long user_id, @RequestBody Date start_date, @RequestBody Date end_date) {
-        return productCommentService.findByUserIdAndCommentDateBetween(user_id, start_date, end_date);
+    @GetMapping("/findCommentsByUserIdAndCommentDateBetween/{userId}/{startDate}/{endDate}")
+    public List<Object> findByUserIdAndCommentDateBetween(@PathVariable(value = "userId") Long userId, @PathVariable(value = "startDate") String startDate, @PathVariable(value = "endDate") String endDate) throws ParseException {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        Date startDateDate = sdf.parse(startDate);
+        Date endDateDate = sdf.parse(endDate);
+        List<ProductComment> productComments = productCommentService.findByUserIdAndCommentDateBetween(userId, startDateDate, endDateDate);
+        List<Object> productCommentsObject = new ArrayList<>();
+        for (ProductComment productComment : productComments) {
+            Map<String, Object> productCommentObject = new HashMap<>();
+            productCommentObject.put("product_id", productComment.getProduct().getId());
+            productCommentObject.put("comment", productComment.getComment());
+            productCommentObject.put("commentDate", productComment.getCommentDate());
+            productCommentObject.put("product", productComment.getProduct().getName());
+            productCommentsObject.add(productCommentObject);
+        }
+
+        return ResponseEntity.ok().body(productCommentsObject).getBody();
     }
 
 }
